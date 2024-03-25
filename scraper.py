@@ -1,11 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
-# from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import requests
-import re
-
+# from bs4 import BeautifulSoup
+# import requests
+# import re
 from typing import List
 
 import os
@@ -19,40 +17,24 @@ class Item:
         self.rating = rating
 
 def amazon(item_name: str):
-    driver.get(f"https://www.amazon.com/")
+    driver.get(f"https://www.amazon.in/")
     try:
         captchaCharacters: WebElement = driver.find_element(by=By.ID, value="captchacharacters")
         driver.implicitly_wait(10)
         print("Solve the captcha...")
     except:
         pass
-
-    changeLangPage: WebElement = driver.find_element(by=By.ID, value="icp-nav-flyout")
-    changeLangPage.click()
-    """ changeLang: WebElement = driver.find_element(by=By.ID, value="a-dropdown-prompt")
-    changeLang.click() """
-
-    """ searchBox: WebElement = driver.find_element(by=By.ID, value="twotabsearchtextbox")
+    searchBox: WebElement = driver.find_element(by=By.ID, value="twotabsearchtextbox")
     searchBox.send_keys(item_name)
     searchButton: WebElement = driver.find_element(by=By.ID, value="nav-search-submit-button")
     searchButton.click()
 
-    items = driver.find_elements(By.CSS_SELECTOR, "h2 a span")
+    items = driver.find_elements(By.XPATH, "/html/body/div[1]/div[1]/div[1]/div[1]/div/span[1]/div[1]")
     for i in items:
-        print(i.text) """
+        print(i.find_element(by=By.XPATH, value='/div/div/div/div/span/div/div/div[1]/div/span/a').text)
 
-    """ ratings = driver.find_element(By.XPATH, "//*[@id=\"a-popover-content-2\"]/div/div/div/div[1]/span")
-    # ratings = driver.find_element(By.XPATH, "//span[@data-hook='acr-average-stars-rating-text']")
-    for i in ratings:
-        print(i.text) """
-
-    """ url: str = driver.current_url
-    page = requests.get(url).text
-    doc = BeautifulSoup(page, "html.parser")
-    for i in doc.find_all('span', attrs={'data-hook': 'acr-average-stars-rating-text'}):
-        print(i.text) """
 
 
 if __name__ == "__main__":
-    amazon("jeans pant")
+    amazon("kurta shirt")
     input("Press enter to quit... ")
