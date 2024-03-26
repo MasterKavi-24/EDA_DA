@@ -58,7 +58,7 @@ def amazon(item_name: str):
     actions = webdriver.ActionChains(driver)
     actions.send_keys(Keys.CONTROL + "w").perform()
     '''
-        
+
     item_name_ = "+".join(item_name.split(" "))
     driver.get(f"https://www.amazon.in/s?k={item_name_}&s=review-rank")
 
