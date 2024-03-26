@@ -13,15 +13,16 @@ from typing import List
 import os
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-driver = webdriver.Chrome()
+driver: webdriver = webdriver.Chrome()
 
 class Item:
     def __init__(self, name: str, rating: float) -> None:
         self.name = name
         self.rating = rating
+        self.reviews = []
 
 def amazon(item_name: str):
-    urls = []
+    urls: List[str] = []
     driver.get(f"https://www.amazon.in/")
     try:
         captchaCharacters: WebElement = driver.find_element(by=By.ID, value="captchacharacters")
@@ -59,8 +60,7 @@ def amazon(item_name: str):
     actions.send_keys(Keys.CONTROL + "w").perform()
     '''
 
-    item_name_ = "+".join(item_name.split(" "))
-    driver.get(f"https://www.amazon.in/s?k={item_name_}&s=review-rank")
+    driver.get(f"https://www.amazon.in/s?k={'+'.join(item_name.split(' '))}&s=review-rank")
 
     urls = []
 
@@ -119,6 +119,19 @@ def amazon(item_name: str):
     #     for j in i.find_elements(by=By.TAG_NAME, value='a'):
     #         urls.append(j.get_attribute("href"))
     # print(urls, len(urls)) """
+
+    items: List[Item]
+    reviewUrl: str = urls[0].replace("dp", "product-reviews")
+    driver.get(reviewUrl)
+
+    print(driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div[2]/div[1]/h1/a").text)
+    print(driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/span").text)
+
+
+
+    """ for i in urls:
+        driver.get(i) """
+
 
 
 if __name__ == "__main__":
