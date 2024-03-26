@@ -28,8 +28,8 @@ def amazon(item_name: str):
         pass
 
     """ changeLangPage: WebElement = driver.find_element(by=By.ID, value="icp-nav-flyout")
-    changeLangPage.click() """
-    """ changeLang: WebElement = driver.find_element(by=By.ID, value="a-dropdown-prompt")
+    changeLangPage.click()
+    changeLang: WebElement = driver.find_element(by=By.ID, value="a-dropdown-prompt")
     changeLang.click() """
 
     searchBox: WebElement = driver.find_element(by=By.ID, value="twotabsearchtextbox")
