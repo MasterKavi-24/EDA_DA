@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 # import requests
 import re
 from typing import List
+import math
 
 import os
 
@@ -132,27 +133,30 @@ def amazon(item_name: str):
         reviews_count: str = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[4]/div").text
         reviews_count = re.search(r'(\d+)\s+with\s+reviews', reviews_count).group(1)
         print("ratings with review:", reviews_count, int(reviews_count)/10)
+        pageShifts: int = math.ceil(int(reviews_count)/10)
 
-
-        print("wts dis:", driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div[2]/div[1]/h1/a").text)
+        print("Item Title:", driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div[2]/div[1]/h1/a").text)
         
 
         totalRatingsStr: WebElement = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/span").text
         # rating: re.Match = re.search(r'\d+(\.\d+)?', totalRatingsStr).group(0)
         print("totalRatingsStr:", totalRatingsStr)
 
-        for j in range(1, 11):
-            try:
-                print(f"rating {j}:", driver.find_element(by=By.XPATH, value=f"/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[{j}]/div/div/div[4]/span/span").text)
-            except:
-                # less than 10 comments in that page, skip
-                pass
+        for _ in range(pageShifts):
+            for j in range(1, 11):
+                try:
+                    print(f"rating {j}:", driver.find_element(by=By.XPATH, value=f"/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[{j}]/div/div/div[4]/span/span").text)
+                except:
+                    # less than 10 comments in that page, skip
+                    pass
+            nextPageButton: WebElement = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[11]/span/div/ul/li[2]/a")
+            nextPageButton.click()
         
         # go to next page
         # cur page: https://www.amazon.in/KINGDOM-WHITE-Cloudie-Sleeves-Regular/product-reviews/B0BGQG2T54/
         # nxt page: https://www.amazon.in/KINGDOM-WHITE-Cloudie-Sleeves-Regular/product-reviews/B0BGQG2T54/ref=cm_cr_arp_d_paging_btm_next_2?pageNumber=2
         # actually nvm, just go by click :(
-        
+
         # nextPage: WebElement = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[11]/span/div/ul/li[2]/a")
         # nextPage.click()
 
