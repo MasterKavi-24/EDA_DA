@@ -8,8 +8,10 @@ from selenium.webdriver.support import expected_conditions as EC
 # from bs4 import BeautifulSoup
 # import requests
 import re
-from typing import List
+from typing import List, Set
 import math
+
+import csv
 
 import os
 
@@ -24,7 +26,14 @@ class Item:
         self.reviews = []
 
 def amazon(item_name: str):
+    with open("ratings.csv", 'w') as f:
+        ...
+    f = open("ratings.csv", "w", encoding="utf-8")
+    csvWriter= csv.writer(f)
+
+    # items: List[Item]
     urls: List[str] = []
+    # l: list = []
     driver.get(f"https://www.amazon.in/")
     try:
         captchaCharacters: WebElement = driver.find_element(by=By.ID, value="captchacharacters")
@@ -63,9 +72,6 @@ def amazon(item_name: str):
     '''
 
     driver.get(f"https://www.amazon.in/s?k={'+'.join(item_name.split(' '))}&s=review-rank")
-
-    urls = []
-
     i = 2
     # i goes to 52 for "kurta shirt"
     regex_pattern = r'(https://www\.amazon\.in/.+/dp/\w+/)'
@@ -124,33 +130,51 @@ def amazon(item_name: str):
     #         urls.append(j.get_attribute("href"))
     # print(urls, len(urls)) """
 
-    items: List[Item]
-
-    for i in range(2):
+    for i in range(len(urls)-5):
         reviewUrl: str = urls[i].replace("dp", "product-reviews")
+        # formatStr = "/ref=cm_cr_getr_d_paging_btm_next_{}?pageNumber={}"
+        # driver.get(reviewUrl + formatStr.format(1, 1))
         driver.get(reviewUrl)
-
         reviews_count: str = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[4]/div").text
         reviews_count = re.search(r'(\d+)\s+with\s+reviews', reviews_count).group(1)
         print("ratings with review:", reviews_count, int(reviews_count)/10)
         pageShifts: int = math.ceil(int(reviews_count)/10)
 
-        print("Item Title:", driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div[2]/div[1]/h1/a").text)
+        itemTitle: str = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div[2]/div[1]/h1/a").text
+        print("Item Title:", itemTitle)
         
 
         totalRatingsStr: WebElement = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/span").text
         # rating: re.Match = re.search(r'\d+(\.\d+)?', totalRatingsStr).group(0)
         print("totalRatingsStr:", totalRatingsStr)
 
-        for _ in range(pageShifts):
-            for j in range(1, 11):
-                try:
-                    print(f"rating {j}:", driver.find_element(by=By.XPATH, value=f"/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[{j}]/div/div/div[4]/span/span").text)
-                except:
-                    # less than 10 comments in that page, skip
-                    pass
-            nextPageButton: WebElement = driver.find_element(by=By.XPATH, value="/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[11]/span/div/ul/li[2]/a")
-            nextPageButton.click()
+        # for page in range(1, pageShifts+1):
+        ratingsText: Set[str] = set()
+        for j in range(1, 11):
+            try:
+                ratingText = driver.find_element(by=By.XPATH, value=f"/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[{j}]/div/div/div[4]/span/span").text
+                print(f"rating {j}:", ratingText)
+                ratingsText.add(ratingText)
+            except:
+                # less than 10 comments in that page, skip
+                pass
+        
+        l = []
+        for ratingText_ in ratingsText:
+            l.append(ratingText_)
+        csvWriter.writerow([itemTitle]+l)
+            
+        """ nextPageButton: WebElement = driver.find_element(by=By.XPATH, value=f"/html/body/div[1]/div[2]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[{j+4}]/span/div/ul/li[2]/a")
+        nextPageButton.click() """
+        
+        '''
+        with open("ratings.csv", 'a') as f:
+            f.write("item,ratings")
+            l = []
+            for rT in ratingsText:
+                l.append(str(rT, encoding="utf-8"))
+            f.write(f"{itemTitle},{l}")
+        '''
         
         # go to next page
         # cur page: https://www.amazon.in/KINGDOM-WHITE-Cloudie-Sleeves-Regular/product-reviews/B0BGQG2T54/
@@ -162,7 +186,7 @@ def amazon(item_name: str):
 
         """ for i in urls:
             driver.get(i) """
-
+    f.close()
 
 if __name__ == "__main__":
     amazon("kurta shirt")
